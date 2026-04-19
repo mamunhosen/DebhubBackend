@@ -1,0 +1,61 @@
+version: "3.8"
+
+services:
+  # PostgreSQL Database
+  devhub-postgres:
+    image: postgres:18-alpine
+    container_name: devhub-postgres-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - devhub_postgres_data_dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Node.js Application (Development)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: devhub-app-dev
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=devhub-postgres
+    depends_on:
+      devhub-postgres:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    command: npm run dev
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: devhub-pgadmin-dev
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "admin@admin.com"
+      PGADMIN_DEFAULT_PASSWORD: "admin"
+    ports:
+      - "5050:80"
+    volumes:
+      - devhub_pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - devhub-postgres
+
+volumes:
+  devhub_postgres_data_dev:
+    driver: local
+  devhub_pgadmin_data:
+    driver: local
