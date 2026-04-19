@@ -25,10 +25,48 @@ export class AuthService {
       throw new AppError("Invalid credentials", 401);
     }
 
+    // Check if account is locked
+    if (user.lockoutUntil && user.lockoutUntil > new Date()) {
+      const remainingMinutes = Math.ceil(
+        (user.lockoutUntil.getTime() - Date.now()) / 1000 / 60,
+      );
+      throw new AppError(
+        `Account is locked due to too many failed attempts. Please try again in ${remainingMinutes} minutes.`,
+        403,
+      );
+    }
+
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      throw new AppError("Invalid credentials", 401);
+      const maxAttempts = 3;
+      const loginAttempts = (user.loginAttempts || 0) + 1;
+      const remainingAttempts = Math.max(0, maxAttempts - loginAttempts);
+      let lockoutUntil: Date | null = null;
+
+      if (loginAttempts >= maxAttempts) {
+        lockoutUntil = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+      }
+
+      await this.userRepository.update(user.id, {
+        loginAttempts,
+        lockoutUntil: lockoutUntil as any,
+      });
+
+      if (loginAttempts >= maxAttempts) {
+        throw new AppError(
+          "Account locked due to 3 failed attempts. Please try again in 15 minutes.",
+          403,
+          "ACCOUNT_LOCKED",
+        );
+      }
+
+      throw new AppError(
+        `Invalid credentials. ${remainingAttempts} attempts remaining.`,
+        401,
+        "INVALID_CREDENTIALS",
+        { remainingAttempts },
+      );
     }
 
     if (!user.isActive) {
@@ -37,15 +75,23 @@ export class AuthService {
 
     const tokens = this.generateTokens(user.id);
 
-    // Store hashed refresh token
+    // Store hashed refresh token and reset login attempts
     const salt = await bcrypt.genSalt(10);
     const hashedRefreshToken = await bcrypt.hash(tokens.refreshToken, salt);
     await this.userRepository.update(user.id, {
       refreshToken: hashedRefreshToken,
+      loginAttempts: 0,
+      lockoutUntil: null as any,
     });
 
     // Remove sensitive fields
-    const { password: _, refreshToken: __, ...userWithoutSecrets } = user;
+    const {
+      password: _,
+      refreshToken: __,
+      loginAttempts: ___,
+      lockoutUntil: ____,
+      ...userWithoutSecrets
+    } = user;
 
     return {
       ...tokens,

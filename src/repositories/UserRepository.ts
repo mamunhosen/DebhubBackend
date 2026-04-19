@@ -29,6 +29,8 @@ export class UserRepository {
         "password",
         "isActive",
         "refreshToken",
+        "loginAttempts",
+        "lockoutUntil",
       ],
     });
   }
