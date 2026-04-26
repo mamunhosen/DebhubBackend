@@ -58,11 +58,5 @@ export const notFoundHandler = (
   res: Response,
   next: NextFunction,
 ): void => {
-  res.status(404).json({
-    success: false,
-    error: {
-      code: "NOT_FOUND",
-      message: `Route ${req.originalUrl} not found`,
-    },
-  });
+  next(new AppError(`Route ${req.originalUrl} not found`, 404));
 };

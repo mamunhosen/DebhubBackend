@@ -10,13 +10,10 @@ const protectedRouter = Router();
 
 // --- Grouping Logic using the Middleware Application Pattern ---
 
-// 1. Apply middleware to the entire router instance first
-protectedRouter.use(authMiddleware);
-
-// 2. Attach all sub-routers that require protection
-protectedRouter.use("/users", userRoutes);
-protectedRouter.use("/organizations", organizationRoutes);
-protectedRouter.use("/branches", branchRoutes);
-protectedRouter.use("/departments", departmentRoutes);
+// Apply authMiddleware to each sub-router specifically
+protectedRouter.use("/users", authMiddleware, userRoutes);
+protectedRouter.use("/organizations", authMiddleware, organizationRoutes);
+protectedRouter.use("/branches", authMiddleware, branchRoutes);
+protectedRouter.use("/departments", authMiddleware, departmentRoutes);
 
 export default protectedRouter;
