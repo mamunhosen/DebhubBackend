@@ -11,7 +11,9 @@ export const createApp = (): Application => {
 
   // Security middlewares
   app.use(helmet());
-  app.use(cors());
+  app.use(cors({
+    origin: ["http://localhost:5173"]
+  }));
 
   // Body parsing middleware
   app.use(express.json());

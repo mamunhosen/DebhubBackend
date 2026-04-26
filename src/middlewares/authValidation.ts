@@ -7,11 +7,10 @@ export const loginValidation = [
     .withMessage("Email is required")
     .isEmail()
     .withMessage("Invalid email format")
-    .normalizeEmail(),
-  body("password")
-    .trim()
-    .notEmpty()
-    .withMessage("Password is required"),
+    .normalizeEmail({
+      gmail_remove_dots: false,
+    }),
+  body("password").trim().notEmpty().withMessage("Password is required"),
 ];
 
 export const registerValidation = [
@@ -33,7 +32,9 @@ export const registerValidation = [
     .withMessage("Email is required")
     .isEmail()
     .withMessage("Invalid email format")
-    .normalizeEmail(),
+    .normalizeEmail({
+      gmail_remove_dots: false,
+    }),
   body("password")
     .trim()
     .notEmpty()
