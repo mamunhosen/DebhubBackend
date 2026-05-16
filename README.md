@@ -1,68 +1,52 @@
-# Node.js Express TypeScript API with PostgreSQL
+# DevHub Backend - Node.js Express TypeScript API
 
-A scalable, production-ready REST API built with Node.js, Express, TypeScript, and PostgreSQL, containerized with Docker.
+A scalable, production-ready REST API built with Node.js, Express 5, TypeScript, and PostgreSQL, containerized with Docker. This backend serves as the core engine for DevHub, managing organizations, branches, departments, and users with robust authentication.
 
 ## 🚀 Features
 
-- ✅ **TypeScript** - Type-safe code
-- ✅ **Express.js** - Fast, minimalist web framework
-- ✅ **PostgreSQL** - Robust relational database
-- ✅ **TypeORM** - Modern ORM for TypeScript
-- ✅ **Docker & Docker Compose** - Containerized application
-- ✅ **Validation** - Request validation with express-validator
-- ✅ **Error Handling** - Centralized error handling
-- ✅ **Security** - Helmet.js for security headers
-- ✅ **CORS** - Cross-Origin Resource Sharing enabled
-- ✅ **Logging** - Morgan for HTTP request logging
-- ✅ **Hot Reload** - Nodemon for development
+- ✅ **TypeScript** - Type-safe development with modern ES2022 features.
+- ✅ **Express 5** - Utilizing the latest Express features and improved error handling.
+- ✅ **PostgreSQL & TypeORM** - Reliable relational data management with modern ORM patterns.
+- ✅ **JWT Authentication** - Secure token-based authentication and route protection.
+- ✅ **Layered Architecture** - Clean separation of concerns (Controller -> Service -> Repository -> Entity).
+- ✅ **Dockerized** - Ready for development and production with Docker Compose.
+- ✅ **Validation** - Strict request validation using `express-validator`.
+- ✅ **Centralized Error Handling** - Consistent error responses using a custom `AppError` class.
+- ✅ **Security** - Hardened with Helmet.js, CORS, and Rate Limiting.
 
 ## 📁 Project Structure
 
 ```
-nodejs-express-ts-api/
+DevHubBackend/
 ├── src/
-│   ├── config/           # Configuration files
-│   │   └── database.ts   # Database configuration
-│   ├── entities/         # TypeORM entities
-│   │   └── User.ts
-│   ├── repositories/     # Data access layer
-│   │   └── UserRepository.ts
+│   ├── config/           # Database & App configurations
+│   ├── controllers/      # Request handlers (User, Auth, Org, Branch, Dept)
+│   ├── entities/         # TypeORM Database models
+│   ├── middlewares/      # Auth, Validation, and Error middlewares
+│   ├── repositories/     # Data access logic
+│   ├── routes/           # API Route definitions
+│   │   ├── publicRoutes/    # Publicly accessible (Auth, Health)
+│   │   └── protectedRoutes/ # Restricted via JWT (Users, Orgs, etc.)
 │   ├── services/         # Business logic layer
-│   │   └── UserService.ts
-│   ├── controllers/      # Request handlers
-│   │   └── UserController.ts
-│   ├── routes/           # API routes
-│   │   ├── index.ts
-│   │   └── userRoutes.ts
-│   ├── middlewares/      # Custom middlewares
-│   │   ├── errorHandler.ts
-│   │   └── userValidation.ts
-│   ├── utils/            # Utility functions
-│   │   └── AppError.ts
-│   ├── migrations/       # Database migrations
-│   ├── app.ts            # Express app setup
+│   ├── utils/            # Shared utilities (ApiResponse, AppError)
+│   ├── app.ts            # Express application setup
 │   └── server.ts         # Server entry point
-├── .env                  # Environment variables
-├── .env.example          # Example environment variables
-├── docker-compose.yml    # Production Docker Compose
-├── docker-compose.dev.yml # Development Docker Compose
+├── docker-compose.yml    # Production Docker configuration
+├── docker-compose.dev.yml # Development Docker configuration
 ├── Dockerfile            # Production Dockerfile
 ├── Dockerfile.dev        # Development Dockerfile
-├── package.json
-├── tsconfig.json
-└── README.md
+├── Makefile              # Shortcut commands
+├── .env                  # Environment variables
+└── package.json
 ```
 
 ## 🛠️ Tech Stack
 
-- **Runtime**: Node.js 20
-- **Framework**: Express.js 4.19
-- **Language**: TypeScript 5.5
+- **Runtime**: Node.js 20+
+- **Framework**: Express 5.2.x
+- **Language**: TypeScript 5.9.x
 - **Database**: PostgreSQL 16
-- **ORM**: TypeORM 0.3
-- **Validation**: express-validator
-- **Security**: Helmet, CORS
-- **Logging**: Morgan
+- **ORM**: TypeORM 0.3.x
 - **Container**: Docker & Docker Compose
 
 ## 📋 Prerequisites
@@ -76,247 +60,86 @@ nodejs-express-ts-api/
 ### Using Docker (Recommended)
 
 1. **Clone the repository**
-
    ```bash
    git clone <repository-url>
-   cd nodejs-express-ts-api
+   cd DevHubBackend
    ```
 
 2. **Configure environment variables**
-
    ```bash
    cp .env.example .env
-   # Edit .env with your configuration
+   # Ensure JWT_SECRET and DB credentials are set
    ```
 
 3. **Run with Docker Compose**
 
-   **Production:**
+   **Development (with Hot Reload):**
+   ```bash
+   docker-compose -f docker-compose.dev.yml up --build
+   ```
 
+   **Production:**
    ```bash
    docker-compose up -d
    ```
 
-   **Development (with hot reload):**
-
-   ```bash
-   docker-compose -f docker-compose.dev.yml up
-   ```
-
 4. **Access the application**
-   - API: http://localhost:4000
-   - Health Check: http://localhost:4000/api/v1/health
-   - pgAdmin: http://localhost:5050 (admin@admin.com / admin)
+   - API Base: `http://localhost:4000/api/v1`
+   - Health Check: `http://localhost:4000/api/v1/health`
 
 ### Local Development (Without Docker)
 
 1. **Install dependencies**
-
    ```bash
    npm install
    ```
 
-2. **Setup PostgreSQL**
-   - Install PostgreSQL locally
-   - Create a database
-   - Update `.env` with your database credentials
+2. **Setup Database**
+   - Ensure PostgreSQL is running locally.
+   - Create a database named `devhub_db` (or as per your `.env`).
 
-3. **Run the application**
-
-   **Development:**
-
-   ```bash
-   npm run dev
-   ```
-
-   **Build:**
-
-   ```bash
-   npm run build
-   ```
-
-   **Production:**
-
-   ```bash
-   npm start
-   ```
+3. **Run scripts**
+   - `npm run dev`: Start development server with nodemon.
+   - `npm run build`: Compile TypeScript to JavaScript.
+   - `npm start`: Run the compiled production build.
 
 ## 📚 API Endpoints
 
-### Base URL: `http://localhost:4000/api/v1`
+### Public Routes
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| GET | `/health` | API Health check |
+| POST | `/auth/register` | Register a new user |
+| POST | `/auth/login` | Login and receive JWT |
+| POST | `/auth/refresh-token` | Refresh expired access token |
 
-### Health Check
+### Protected Routes (Requires Bearer Token)
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| **Users** | `/users` | CRUD operations for users |
+| **Organizations**| `/organizations` | Manage organization data |
+| **Branches** | `/branches` | Manage branches within organizations |
+| **Departments** | `/departments` | Manage departments within branches |
 
-```
-GET /health
-```
-
-### Users
-
-| Method | Endpoint     | Description         |
-| ------ | ------------ | ------------------- |
-| GET    | /users       | Get all users       |
-| GET    | /users/:id   | Get user by ID      |
-| GET    | /users/stats | Get user statistics |
-| POST   | /users       | Create a new user   |
-| PUT    | /users/:id   | Update user by ID   |
-| DELETE | /users/:id   | Delete user by ID   |
-
-### Example Requests
-
-**Create User:**
-
-```bash
-curl -X POST http://localhost:4000/api/v1/users \
-  -H "Content-Type: application/json" \
-  -d '{
-    "firstName": "John",
-    "lastName": "Doe",
-    "email": "john.doe@example.com",
-    "phone": "+1234567890"
-  }'
-```
-
-**Get All Users:**
-
-```bash
-curl http://localhost:4000/api/v1/users
-```
-
-**Get User by ID:**
-
-```bash
-curl http://localhost:4000/api/v1/users/{user-id}
-```
-
-**Update User:**
-
-```bash
-curl -X PUT http://localhost:4000/api/v1/users/{user-id} \
-  -H "Content-Type: application/json" \
-  -d '{
-    "firstName": "Jane",
-    "isActive": true
-  }'
-```
-
-**Delete User:**
-
-```bash
-curl -X DELETE http://localhost:4000/api/v1/users/{user-id}
-```
-
-## 🔧 Environment Variables
+## 🔧 Key Environment Variables
 
 ```env
-# Server Configuration
-NODE_ENV=development
 PORT=4000
+NODE_ENV=development
+API_PREFIX=/api/v1
 
-# Database Configuration
+# Database
 DB_HOST=postgres
 DB_PORT=5432
 DB_USERNAME=postgres
-DB_PASSWORD=postgres
-DB_NAME=myapp_db
+DB_PASSWORD=your_password
+DB_NAME=devhub_db
 
-# Application
-API_PREFIX=/api/v1
+# Security
+JWT_SECRET=your_super_secret_key
+JWT_EXPIRES_IN=1d
 ```
-
-## 🐳 Docker Commands
-
-**Start services:**
-
-```bash
-docker-compose up -d
-```
-
-**Stop services:**
-
-```bash
-docker-compose down
-```
-
-**View logs:**
-
-```bash
-docker-compose logs -f app
-```
-
-**Rebuild containers:**
-
-```bash
-docker-compose up -d --build
-```
-
-**Remove volumes:**
-
-```bash
-docker-compose down -v
-```
-
-## 📊 Database Management
-
-**Access PostgreSQL:**
-
-```bash
-docker exec -it nodejs-postgres psql -U postgres -d myapp_db
-```
-
-**pgAdmin:**
-
-- URL: http://localhost:5050
-- Email: admin@admin.com
-- Password: admin
-
-## 🧪 Testing the API
-
-You can test the API using:
-
-- **cURL** (see examples above)
-- **Postman** (import the endpoints)
-- **Thunder Client** (VS Code extension)
-- **Insomnia**
-
-## 🏗️ Scaling the Application
-
-This project structure supports easy scaling:
-
-1. **Add new resources**: Create entity → repository → service → controller → routes
-2. **Add middleware**: Create in `middlewares/` folder
-3. **Add utilities**: Create in `utils/` folder
-4. **Database migrations**: Use TypeORM migration commands
-
-## 📝 Scripts
-
-```json
-{
-  "dev": "Run development server with hot reload",
-  "build": "Build TypeScript to JavaScript",
-  "start": "Run production server",
-  "migration:generate": "Generate database migration",
-  "migration:run": "Run database migrations",
-  "migration:revert": "Revert last migration"
-}
-```
-
-## 🔒 Security Features
-
-- Helmet.js for security headers
-- CORS configuration
-- Input validation
-- SQL injection prevention (TypeORM)
-- Error handling without leaking sensitive info
 
 ## 📄 License
 
-MIT
-
-## 👥 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## 📧 Support
-
-For support, email your-email@example.com or open an issue.
+This project is licensed under the ISC License.
